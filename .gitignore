@@ -1,0 +1,28 @@
+
+# Arquivos gerados pelo Tizen
+.tizen-rds/
+Debug/
+Release/
+build/
+dist/
+*.wgt
+*.log
+
+# Dependências
+node_modules/
+
+# Dados e credenciais privadas
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.pem
+*.key
+*.keystore
+credentials.*
+secrets.*
+
+# Playlists pessoais
+*.m3u
+*.m3u8

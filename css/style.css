@@ -1,0 +1,627 @@
+:root { --bg:#070c16; --side:#0c1220; --tile:#172236; --text:#f6f8ff; --muted:#94a3b8; --cyan:#45c9f9; --stroke:#293449; }
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+html,body { padding:0; margin:0; min-height:100%; }
+body { background:var(--bg); color:var(--text); font-family:Arial,Helvetica,sans-serif; font-size:16px; overflow-x:hidden; }
+button,input,select,textarea { font:inherit; }
+button { cursor:pointer; }
+button:focus-visible,input:focus,select:focus,textarea:focus { outline:3px solid var(--cyan); outline-offset:3px; }
+button:disabled { opacity:.5; cursor:default; }
+.brand { font-size:29px; font-weight:800; white-space:nowrap; letter-spacing:-1.1px; }
+.brand > span:last-child { color:var(--cyan); }
+.brand-symbol { display:inline-flex; align-items:center; justify-content:center; width:35px; height:35px; margin-right:6px; color:#071324; font-size:19px; background:var(--cyan); border-radius:11px; }
+.eyebrow { color:var(--cyan); letter-spacing:2px; font-size:11px; font-weight:800; margin:0; }
+.subtle,.fineprint { color:var(--muted); }
+.fineprint { font-size:12px; line-height:1.55; }
+.button-accent,.button-ghost { border-radius:11px; padding:14px 22px; color:white; font-weight:700; border:0; }
+.button-accent { color:#03101c; background:linear-gradient(120deg,#69e0ff,#2cb4f1); box-shadow:0 7px 30px rgba(21,164,222,.16); }
+.button-ghost { color:#e3ebfa; border:1px solid #43526b; background:rgba(14,28,45,.64); }
+.button-block { width:100%; margin:22px 0 0; display:flex; justify-content:space-between; }
+.status { min-height:22px; color:#7dd3fc; }
+.status.error { color:#fda4af; }
+.login-screen { min-height:100vh; display:grid; grid-template-columns: 1fr minmax(480px,590px); background:radial-gradient(circle at 21% 38%,#183456,#0a1222 48%,#080d17 88%); }
+.login-art { position:relative; overflow:hidden; display:grid; place-items:center; }
+.art-ring { display:block; height:450px; width:450px; border:3px solid rgba(72,190,252,.18); border-radius:50%; box-shadow:0 0 0 62px rgba(72,190,252,.045),0 0 0 135px rgba(72,190,252,.025),inset 0 0 80px rgba(58,193,245,.1); }
+.art-play { position:absolute; font-size:125px; color:#55cfff; text-shadow:0 10px 80px rgba(35,178,243,.6); }
+.login-panel { padding:65px 67px; background:#0b1220eb; display:flex; flex-direction:column; justify-content:center; border-left:1px solid #203248; }
+.login-panel .brand { margin-bottom:47px; }
+.login-panel h1 { margin:14px 0 6px; font-size:44px; letter-spacing:-1.5px; }
+.mode-switch { background:#101d2d; border:1px solid #29394c; padding:5px; display:flex; gap:6px; border-radius:12px; margin:30px 0 17px; }
+.mode { color:#9db2c9; background:none; border:none; flex:1; padding:14px 10px; font-weight:700; border-radius:9px; }
+.mode.selected { color:#fff; background:#25415b; }
+.login-panel label { display:block; color:#c1cee0; font-size:14px; font-weight:700; margin:16px 0 8px; }
+.login-panel input,.login-panel textarea { width:100%; padding:15px 16px; border:1px solid #314359; color:#fff; background:#0a1423; border-radius:9px; }
+.login-panel input::placeholder,.login-panel textarea::placeholder { color:#72869e; }
+.app-screen { display:flex; min-height:100vh; }
+.rail { position:sticky; top:0; height:100vh; overflow-y:auto; flex:0 0 230px; background:linear-gradient(170deg,#111d31,#090f1c 73%); padding:35px 22px 20px; border-right:1px solid #1d2a40; display:flex; flex-direction:column; z-index:5; }
+.rail .brand { font-size:24px; margin:4px 0 64px; }
+.rail .brand-symbol { width:29px; height:29px; font-size:15px; }
+.rail-label { color:#6b829c; font-size:11px; font-weight:800; letter-spacing:2.2px; margin:0 0 20px 14px; }
+.primary-nav { display:flex; flex-direction:column; gap:9px; }
+.nav-item { width:100%; display:flex; align-items:center; gap:13px; padding:18px 14px; background:transparent; border:1px solid transparent; border-radius:12px; color:#a4b3ca; font-weight:700; text-align:left; white-space:nowrap; }
+.nav-item.active { background:#1b3c57; color:#edfaff; border-color:#296388; }
+.nav-item:hover,.nav-item:focus-visible { color:#fff; background:#223a53; }
+.nav-icon { width:25px; font-size:23px; font-weight:400; line-height:1; }
+.rail-bottom { margin-top:auto; display:grid; gap:20px; }
+.rail-bottom small { color:#53687d; font-size:11px; padding:0 12px; }
+.rail-bottom small span { color:#7d9cbe; }
+.connection-marker { padding:0 13px; color:#93b6c4; font-size:13px; }
+.green-dot,.red-dot { display:inline-block; width:8px; height:8px; background:#52d5a3; border-radius:50%; margin-right:7px; }
+.red-dot { background:#fb617c; }
+.main-content { padding:34px 45px 60px; width:calc(100% - 230px); min-width:0; background:radial-gradient(circle at 58% 0%,#162941 0%,#0b1423 47%,#090f1b 83%); }
+.page-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:26px; }
+.page-top h1 { margin:9px 0 0; font-size:27px; letter-spacing:-.5px; }
+.top-actions { display:flex; align-items:center; gap:19px; color:#91a4ba; }
+.top-count { font-size:13px; }
+.avatar { background:linear-gradient(140deg,#172e46,#284a68); width:41px; height:41px; display:grid; place-items:center; color:#9de7ff; font-size:13px; border-radius:50%; border:1px solid #386180; }
+.hero { min-height:350px; display:grid; grid-template-columns:minmax(280px,.95fr) minmax(420px,1.05fr); gap:20px; position:relative; padding:30px 30px 30px 36px; border:1px solid #253650; border-radius:22px; background:radial-gradient(circle at 88% 9%,rgba(43,138,189,.19),transparent 53%),linear-gradient(115deg,#14253b,#111a2a 85%); overflow:hidden; box-shadow:0 22px 70px rgba(0,0,0,.13); }
+.hero-copy { display:flex; flex-direction:column; justify-content:center; min-width:0; }
+.hero-copy h2 { font-size:clamp(27px,2.7vw,43px); letter-spacing:-1.1px; line-height:1.13; margin:14px 0; max-width:490px; overflow-wrap:anywhere; }
+.hero-description { line-height:1.55; color:#a7b9d0; max-width:540px; min-height:48px; font-size:15px; }
+.hero-meta { display:flex; align-items:center; gap:12px; color:#9cb7d2; font-size:13px; margin:4px 0 18px; }
+.meta-chip { color:#80dcfc; border:1px solid #27799a; border-radius:4px; padding:5px 9px; font-size:10px; letter-spacing:1px; font-weight:800; }
+.hero-buttons { display:flex; flex-wrap:wrap; gap:10px; }
+.preview-frame { position:relative; width:100%; aspect-ratio:16/9; max-height:340px; align-self:center; border-radius:17px; overflow:hidden; border:1px solid #38536a; background:#050b14; box-shadow:0 15px 45px #0009; }
+.player-stage { position:absolute; inset:0; background:transparent; z-index:1; }
+.avplay-object,.browser-video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; background:transparent; }
+.preview-placeholder { position:absolute; z-index:2; inset:0; background:radial-gradient(circle at 50% 40%,#1a3e5b,#080f1c 75%); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; pointer-events:none; }
+.preview-mark { font-size:33px; color:#72dafe; display:grid; place-items:center; width:79px; height:79px; background:#23507070; border-radius:50%; border:1px solid #4bbded80; }
+.preview-placeholder strong { font-size:17px; }
+.preview-placeholder small { color:#99b0c9; font-size:13px; }
+.preview-live { position:absolute; z-index:3; top:17px; left:16px; font-size:11px; font-weight:800; background:#101927bb; padding:8px 12px; border-radius:8px; }
+.preview-bottom { pointer-events:none; position:absolute; z-index:3; bottom:0; left:0; right:0; padding:28px 16px 15px; display:flex; justify-content:space-between; color:#edf6fd; font-size:13px; background:linear-gradient(transparent,#050b14cc); }
+.catalog-heading { display:flex; justify-content:space-between; align-items:end; margin:31px 0 16px; }
+.catalog-heading h2 { margin:7px 0 0; font-size:24px; letter-spacing:-.4px; }
+.catalog-heading .subtle { font-size:13px; }
+.filterbar { display:flex; gap:16px; align-items:center; margin-bottom:20px; }
+.categories { display:flex; overflow-x:auto; flex:1; min-width:0; gap:8px; padding:6px 4px 8px; scrollbar-width:thin; }
+.category-btn { border:1px solid #304056; color:#a7b8cd; background:#162236; border-radius:9px; white-space:nowrap; padding:12px 16px; font-size:13px; font-weight:700; }
+.category-btn.active { color:#031522; background:#61d1f5; border-color:#61d1f5; }
+.search-box { position:relative; width:230px; min-width:180px; }
+.search-box span { color:#7a9db7; position:absolute; left:14px; top:8px; font-size:25px; }
+.search-box input { width:100%; padding:13px 10px 13px 43px; border:1px solid #32445d; background:#0e1a2a; border-radius:10px; color:#fff; }
+.search-box input::placeholder { color:#71849b; }
+.media-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:16px; }
+.media-card { min-width:0; border:1px solid #263950; border-radius:13px; background:#142033; color:#fff; padding:0; text-align:left; overflow:hidden; display:flex; flex-direction:column; transition:transform .15s,border-color .15s; }
+.media-card:hover,.media-card:focus-visible,.media-card.is-picked { border-color:#4bd3fa; transform:translateY(-2px); }
+.poster { width:100%; aspect-ratio:2/3; background:linear-gradient(145deg,#1f3e57,#10192a 68%); display:grid; place-items:center; overflow:hidden; position:relative; }
+.poster img { width:100%; height:100%; object-fit:cover; }
+.poster-fallback { font-size:46px; opacity:.45; color:#a1d7f3; }
+.channel-mode .poster { aspect-ratio:16/9; }
+.channel-mode .poster img { object-fit:contain; width:72%; height:75%; }
+.channel-mode .poster-fallback { font-size:31px; }
+.card-copy { padding:13px 13px 15px; flex:1; min-height:75px; }
+.card-copy strong { font-size:14px; line-height:1.35; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.card-copy small { display:block; font-size:11px; color:#91a8bd; margin-top:9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.catalog-message { background:#182943; border:1px solid #385575; padding:20px; margin:12px 0; border-radius:12px; color:#b6cde0; }
+.load-more { display:block; margin:28px auto; padding:13px 23px; color:#dcf4ff; background:#1c3550; border:1px solid #386183; border-radius:9px; }
+.detail-overlay { position:fixed; inset:0; z-index:20; background:#040812e8; overflow:auto; padding:5vh 6vw; }
+.detail-panel { max-width:1160px; margin:0 auto; background:#111c2d; padding:36px; border-radius:18px; border:1px solid #34485f; }
+.close-detail { float:right; color:#b5cbe0; border:1px solid #3d5673; padding:12px 17px; border-radius:8px; background:#1b2c42; }
+.detail-heading { display:flex; align-items:stretch; gap:30px; clear:both; padding-top:25px; }
+.detail-cover { flex:0 0 210px; aspect-ratio:2/3; border-radius:14px; overflow:hidden; background:linear-gradient(#274762,#0c1929); display:grid; place-items:center; }
+.detail-cover img { width:100%; height:100%; object-fit:cover; }
+.detail-cover span { color:#85d8fb; font-size:50px; }
+.detail-copy { flex:1; }
+.detail-copy h2 { font-size:35px; margin:10px 0; }
+.detail-plot { color:#b6c5d7; line-height:1.6; font-size:16px; }
+.detail-panel h3 { margin:25px 0 12px; }
+#seasonSelect { background:#233952; border:1px solid #50627b; border-radius:7px; color:#fff; padding:10px; }
+.episodes { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; margin-top:15px; max-height:43vh; overflow:auto; }
+.episode { text-align:left; padding:15px; border:1px solid #364b63; background:#1b2c42; border-radius:9px; color:#fff; }
+.episode small { display:block; margin-top:5px; color:#90a8c0; }
+.fullscreen-layer { position:fixed; z-index:50; inset:0; background:#000; }
+.fullscreen-dock { position:absolute; inset:0; }
+.fullscreen-dock .player-stage { position:absolute; inset:0; }
+.fullscreen-top,.fullscreen-bottom { position:absolute; z-index:6; left:0; right:0; padding:25px 42px; display:flex; align-items:center; gap:12px; background:linear-gradient(#071320eb,transparent); }
+.fullscreen-top { top:0; justify-content:space-between; }
+.fullscreen-top h2 { margin:6px 0; font-size:28px; }
+.fullscreen-bottom { bottom:0; background:linear-gradient(transparent,#071320df); }
+.fullscreen-bottom p { flex:1; color:#a9c2d4; }
+.fullscreen-bottom .subtle { font-size:12px; }
+@media(max-width:1350px) { .rail { flex-basis:190px;padding:25px 13px; } .main-content{width:calc(100% - 190px);padding:27px;} .hero{padding:24px;} .media-grid{grid-template-columns:repeat(4,minmax(0,1fr));} }
+@media(max-width:1000px) { .hero { grid-template-columns:1fr; } .preview-frame{max-height:none;max-width:680px;} .media-grid{grid-template-columns:repeat(3,minmax(0,1fr));} .filterbar {flex-wrap:wrap;} .search-box{width:100%;} .rail .brand{font-size:19px;} .rail{flex-basis:150px;} .main-content{width:calc(100% - 150px);} }
+@media(max-width:680px) { .login-screen{display:block;} .login-art{display:none;} .login-panel{min-height:100vh;padding:40px 24px;} .app-screen{display:block;} .rail{position:relative;width:100%;height:auto;display:block;padding:17px;} .rail .brand{margin:0 0 12px;} .primary-nav{flex-direction:row;overflow:auto;} .nav-item{font-size:13px;padding:11px;} .rail-bottom{display:none;} .main-content{width:100%;padding:18px;} .hero{padding:20px;} .media-grid{grid-template-columns:repeat(2,minmax(0,1fr));} .detail-heading{flex-direction:column;} .detail-cover{width:155px;flex-basis:auto;} .episodes{grid-template-columns:1fr;} }
+/* MDStream v4 — seleção e salvamento de perfis locais */
+.profiles-screen { min-height:100vh; padding:50px 7vw; background:radial-gradient(circle at 45% 8%,#163657,#090f1c 66%); }
+.profiles-shell { max-width:1300px; margin:0 auto; }
+.profiles-shell > .brand { margin-bottom:70px; }
+.profiles-shell h1 { font-size:clamp(32px,3vw,49px); margin:14px 0 8px; }
+.profiles-shell > .subtle { line-height:1.5; margin-bottom:35px; }
+.profiles-grid { display:grid; grid-template-columns:repeat(3,minmax(250px,1fr)); gap:19px; margin:28px 0 22px; }
+.profile-card { background:linear-gradient(145deg,#1a314c,#111c30); border:1px solid #33516c; border-radius:18px; padding:24px; display:flex; flex-direction:column; gap:9px; min-width:0; box-shadow:0 15px 45px #0002; }
+.profile-icon { display:grid;place-items:center; width:62px;height:62px; background:#235a77;border:1px solid #4587a4;border-radius:15px;color:#9ae5ff;font-size:30px; margin-bottom:10px; }
+.profile-name { font-size:22px; overflow-wrap:anywhere; }
+.profile-server { font-size:14px; color:#9db6ca; overflow-wrap:anywhere; }
+.profile-meta { font-size:12px; color:#85cfe3; min-height:24px; margin-bottom:12px; }
+.profile-actions { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:auto; }
+.profile-connect { grid-column:span 2; padding:13px; border-radius:9px; border:0; font-weight:800; }
+.profile-action { padding:12px; border-radius:9px; }
+.add-profile { border:1px dashed #4b829d; background:#142d43; border-radius:12px; padding:20px 30px; color:#a0e4ff; font-weight:800; font-size:16px; }
+.login-back { display:block;align-self:flex-start;background:none;border:none;color:#8ccfeb;padding:10px 0;margin:-38px 0 25px; }
+.remember-panel { margin-top:15px;padding:16px;border:1px solid #304359;background:#0e1a2b;border-radius:11px; }
+.login-panel .checkbox-line { display:flex;align-items:center;gap:12px;margin:7px 0 14px;line-height:1.5;color:#e2edfb;font-size:14px; }
+.checkbox-line input[type="checkbox"] { width:23px;height:23px;flex-shrink:0;margin:0;accent-color:#38bdf8; }
+.checkbox-line small { display:inline;color:#8ba8c5;font-weight:400; }
+.remember-panel .fineprint { margin:4px 0 0;font-size:11px; }
+.delete-overlay { position:fixed;z-index:90;inset:0;background:#020711ee;display:grid;place-items:center;padding:25px; }
+.delete-box { background:#17263a;border:1px solid #405a73;border-radius:18px;padding:36px;max-width:550px;width:100%; }
+.delete-box h2 { font-size:28px; }
+.delete-box p { line-height:1.6; }
+.delete-actions { display:flex;justify-content:flex-end;gap:12px;margin-top:25px; }
+.danger-button { color:#fff;background:#b52b48;border:0;border-radius:11px;padding:14px 22px;font-weight:800; }
+.storage-warning { background:#403022;color:#ffdfa8;padding:14px 20px;border-radius:9px;margin:0 0 18px; }
+@media(max-width:1050px){.profiles-grid{grid-template-columns:repeat(2,minmax(250px,1fr));}}
+@media(max-width:680px){.profiles-screen{padding:26px 18px;}.profiles-shell > .brand{margin-bottom:40px;}.profiles-grid{grid-template-columns:1fr;}.login-back{margin:0 0 20px;}}
+
+/* v4.1 - Realce de foco forte para controle remoto Samsung */
+.login-screen button:focus,
+.login-screen input:focus,
+.login-screen textarea:focus,
+.profiles-screen button:focus,
+.remember-panel .checkbox-line:focus-within {
+  outline: 4px solid #64dcff;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(31, 189, 255, .24), 0 0 24px rgba(31, 189, 255, .25);
+}
+.login-screen input:focus,
+.login-screen textarea:focus { background: #152b43; border-color: #64dcff; }
+.login-screen .checkbox-line { border-radius: 6px; }
+
+/* v4.2: destaque sempre visível com o controle remoto da Samsung */
+.app-screen button:focus,
+.profiles-screen button:focus,
+.detail-overlay button:focus,
+.detail-overlay select:focus,
+.fullscreen-layer button:focus,
+.delete-overlay button:focus,
+.app-screen input:focus {
+  outline: 4px solid #65dcff !important;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(30,178,232,.26), 0 0 28px rgba(39,197,249,.28);
+  position: relative;
+  z-index: 4;
+}
+.app-screen .media-card:focus { border-color: #76e4ff; transform: translateY(-2px) scale(1.015); }
+.app-screen .nav-item:focus, .app-screen .category-btn:focus { background-color: #24527b; color: #fff; }
+[hidden] { display: none !important; }
+
+/* MDStream 4.3: vídeo em tela cheia e barra de controles VOD */
+.fullscreen-layer { background:transparent; }
+.fullscreen-layer .fullscreen-top, .fullscreen-layer .fullscreen-bottom { display:none !important; }
+body.md-playback-mode { background:transparent !important; }
+body.md-playback-mode #appScreen { visibility:hidden; }
+body.md-playback-mode #fullscreenLayer { visibility:visible; }
+body.md-playback-mode .fullscreen-dock { background:transparent; }
+.playback-toast { position:absolute;z-index:80;left:50%;bottom:12%;transform:translateX(-50%);background:#0a1529ed;border:1px solid #274f69;padding:16px 25px;color:white;border-radius:14px;max-width:85%;text-align:center;pointer-events:none;font-size:18px; }
+.vod-controls { position:absolute;z-index:90;left:0;right:0;bottom:0;padding:38px 7vw 45px;color:#fff;background:linear-gradient(transparent,#06101ef2 22%,#071320ef); }
+.vod-title-row { display:flex;gap:20px;justify-content:space-between;align-items:center;margin-bottom:25px;font-size:22px; }
+.vod-title-row span { color:#a9c8db;font-size:14px; }
+.vod-progress-row { display:flex;gap:20px;align-items:center; }
+.vod-progress-row span { min-width:56px;white-space:nowrap;font-size:15px;color:#e6effb; }
+#vodProgress { flex:1;accent-color:#49d2ff;cursor:pointer;height:25px; }
+#vodProgress:disabled {opacity:.45;}
+.vod-buttons {display:flex;align-items:center;justify-content:center;gap:18px;margin-top:16px;}
+.vod-buttons button {border-radius:14px;border:1px solid #41667d;background:#1b324ccc;color:#f2f8ff;padding:17px 26px;font-size:21px;font-weight:bold;min-width:120px;}
+.vod-buttons button:focus {outline:4px solid #6bdcff;outline-offset:3px;background:#24618c;}
+
+/* v4.4: preview AVPlay exige região limpa, sem máscara preta opaca. */
+.preview-frame { background:transparent; }
+.preview-frame .player-stage { background:transparent; }
+.preview-frame .avplay-object { background:transparent; }
+/* Fundo somente enquanto o vídeo não foi preparado. */
+.preview-placeholder:not([hidden]) { background:radial-gradient(circle at 50% 40%,#1a3e5b,#080f1c 75%); }
+
+/* v4.6 - histórico VOD: abas e barra de progresso */
+.history-tabs { display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 18px; }
+.history-tab { border:1px solid #37506d; background:#14273d; color:#c1d3e5; border-radius:11px; padding:13px 18px; font-weight:800; }
+.history-tab.active { background:#56cffa; color:#04182c; border-color:#56cffa; }
+.history-tab:focus { outline:4px solid #79edff;outline-offset:3px; }
+.watched-badge { margin:0 13px 6px; font-size:12px; color:#8de8f9;line-height:1.4; }
+.watched-progress { background:#30435a; height:5px; border-radius:5px; margin:0 13px 10px; overflow:hidden; }
+.watched-progress > span { background:#53d9fa; height:100%;display:block; }
+#detailRestart { margin-left:10px; }
+.episode .resume-indicator { display:block; margin-top:6px;color:#7bdefb;font-size:12px; }
+@media(max-width:680px) { .history-tabs {gap:6px;} .history-tab{font-size:12px;padding:10px;} }
+
+/* v4.7 — diagnósticos de reprodução VOD */
+.vod-diagnostics { color:#a7bfd0; font-size:14px; margin:-12px 0 15px; }
+#vodRecover { border-color:#2e9dc1; background:#173c53e6; }
+#vodRecover:disabled { opacity:.45; }
+@media (max-width:950px) { .vod-buttons { flex-wrap:wrap; } .vod-buttons button { font-size:16px; padding:12px 18px; } }
+
+/* MDStream 4.8 — barra selecionável pelo Smart Remote */
+#vodProgress {outline:2px solid transparent;outline-offset:7px;border-radius:12px;}
+#vodProgress:focus {outline:4px solid #77eaff;outline-offset:7px;filter:drop-shadow(0 0 5px #25befb);}
+.vod-seek-target {min-height:24px;text-align:center;color:#87eaff;font-size:19px;font-weight:bold;margin:14px 0 -3px;}
+.vod-seek-target[hidden] {display:none !important;}
+
+
+/* MDStream 4.8 — Ao vivo com prévia sempre inteira na parte superior.
+   O scroll pertence à grade, não ao documento inteiro. Isso impede que
+   scrollIntoView() das setas corte o topo do hero e desalinhe o AVPlay. */
+#appScreen.live-layout {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+#appScreen.live-layout .main-content {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+#appScreen.live-layout .page-top,
+#appScreen.live-layout .hero,
+#appScreen.live-layout .catalog-heading,
+#appScreen.live-layout .filterbar,
+#appScreen.live-layout .catalog-message,
+#appScreen.live-layout #loadMoreBtn,
+#appScreen.live-layout .storage-warning {
+  flex-shrink: 0;
+}
+#appScreen.live-layout .media-grid {
+  grid-auto-rows: max-content;
+  min-height: 75px;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  align-content: start;
+  overscroll-behavior: contain;
+  padding: 5px 6px 14px;
+  scroll-padding-top: 8px;
+  scroll-padding-bottom: 12px;
+}
+#appScreen.live-layout .hero {
+  min-height: 0;
+  height: clamp(245px, 34vh, 350px);
+}
+#appScreen.live-layout .preview-frame {
+  width: 100%;
+  max-height: 100%;
+  min-height: 0;
+  /* Sem alterar o contêiner de reprodução nativa do AVPlay. */
+}
+/* Resoluções menores: preservar a grade utilizável no controle remoto. */
+@media (max-height: 850px) {
+  #appScreen.live-layout .main-content { padding: 14px 26px 16px; }
+  #appScreen.live-layout .page-top { margin-bottom: 12px; }
+  #appScreen.live-layout .hero { height: clamp(210px, 31vh, 265px); padding: 13px 18px; gap: 14px; }
+  #appScreen.live-layout .hero-copy h2 { font-size: 25px; margin: 6px 0; }
+  #appScreen.live-layout .hero-description { font-size: 13px; min-height: 0; line-height: 1.35; margin: 4px 0; }
+  #appScreen.live-layout .hero-meta { margin: 4px 0 9px; }
+  #appScreen.live-layout .hero-buttons button { padding: 9px 14px; }
+  #appScreen.live-layout .catalog-heading { margin: 15px 0 8px; }
+  #appScreen.live-layout .filterbar { margin-bottom: 8px; }
+  #appScreen.live-layout .categories { padding-top: 3px; padding-bottom: 4px; }
+  #appScreen.live-layout .category-btn { padding: 9px 11px; }
+  #appScreen.live-layout .search-box input { padding-top: 10px; padding-bottom: 10px; }
+}
+
+/* Algumas TVs expõem viewport CSS de 960×540 apesar do painel Full HD/4K.
+   Preserve sempre duas colunas na TV ao vivo; o layout empilhado fazia
+   a janela de prévia ser comprimida verticalmente. */
+@media (min-width: 800px) and (max-width: 1000px) {
+  #appScreen.live-layout .hero {
+    grid-template-columns: minmax(220px, .9fr) minmax(285px, 1.1fr);
+  }
+  #appScreen.live-layout .preview-frame {
+    align-self:center;
+    aspect-ratio:16/9;
+    max-height:100%;
+  }
+  #appScreen.live-layout .hero-copy h2 {font-size:22px;line-height:1.07;}
+  #appScreen.live-layout .hero-description {display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+}
+
+/* ===============================================================
+   MDStream 5.0 — Home premium + guia de TV por assinatura (EPG)
+   Preserva preview AVPlay e os controles das telas VOD.
+   =============================================================== */
+.home-dashboard { padding:6px 0 38px; }
+.home-heading { display:flex;justify-content:space-between;align-items:flex-start;margin:8px 0 26px;gap:20px; }
+.home-heading h1 { font-size:clamp(29px,3.1vw,48px);letter-spacing:-1.4px;margin:9px 0 7px; }
+.home-heading p:not(.eyebrow) { color:#9eb6cb;margin:0;font-size:16px; }
+.home-clock { color:#c4ddec;font-size:22px;font-weight:700;white-space:nowrap; }
+.home-tiles { display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:18px;margin-bottom:35px; }
+.home-tile { position:relative;overflow:hidden;min-height:216px;padding:27px;border-radius:22px;border:1px solid #296889;color:white;text-align:left;display:flex;align-items:flex-start;flex-direction:column;justify-content:flex-end;background:linear-gradient(130deg,#06314a,#035aa7 65%,#084977);box-shadow:0 12px 30px #0003; }
+.home-tile:before { content:"";position:absolute;width:260px;height:260px;right:-70px;top:-125px;border:2px solid #ffffff20;border-radius:50%;box-shadow:0 0 0 50px #ffffff08,0 0 0 100px #ffffff06;pointer-events:none; }
+.home-tile.tile-movies { background:linear-gradient(133deg,#651b42,#ba3158 57%,#eb7b45);border-color:#a44866; }
+.home-tile.tile-series { background:linear-gradient(133deg,#22285e,#5342a7 65%,#546ec7);border-color:#5666ab; }
+.home-tile strong { font-size:30px;margin-bottom:5px;letter-spacing:-.5px; }
+.home-tile small {color:#ffffffc9;font-size:15px;}
+.home-tile .tile-icon { position:absolute;left:28px;top:22px;font-size:40px;font-weight:700; }
+.home-tile .tile-arrow { position:absolute;right:23px;bottom:23px;font-size:24px;color:#ffffffdd; }
+.home-tile:hover,.home-tile:focus {outline:4px solid #87e7ff;outline-offset:3px;filter:brightness(1.16); }
+.home-strip { margin:28px 0; }
+.home-strip-heading { display:flex;align-items:center;justify-content:space-between;margin:0 0 16px;gap:15px; }
+.home-strip-heading h2 {font-size:22px;margin:0;}
+.home-strip-heading p {font-size:12px;color:#88a8bd;margin:5px 0 0;}
+.home-strip-heading button {border:0;background:transparent;color:#7fe5ff;font-weight:700;padding:10px;}
+.home-carousel {display:flex;gap:15px;overflow-x:auto;scroll-padding:4px;padding:7px 6px 16px;min-height:120px;}
+.home-poster {flex:0 0 165px;min-width:0;border:1px solid #304a68;border-radius:13px;background:#12243a;display:flex;flex-direction:column;text-align:left;color:white;overflow:hidden;padding:0 0 12px;}
+.home-poster:hover,.home-poster:focus {outline:4px solid #6cdbfa;outline-offset:2px;}
+.home-cover {height:190px;background:linear-gradient(150deg,#0c4465,#18223b 55%,#0b1526);display:grid;place-items:center;margin-bottom:10px;}
+.home-cover:empty:before { content:"▶";font-size:38px;color:#64bde8;opacity:.7;}
+.home-cover img {width:100%;height:100%;object-fit:cover;}
+.home-poster strong,.home-poster small {margin:0 12px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.home-poster strong {font-size:14px;margin-bottom:4px;}
+.home-poster small {font-size:12px;color:#8fbad2;}
+.live-guide { display:flex;flex:1 1 auto;flex-direction:column;min-height:100px;overflow:hidden;border:1px solid #223c54;border-radius:15px;background:#081727; }
+.guide-toolbar {display:grid;grid-template-columns:240px minmax(0,1fr);background:#0c1e33;flex:0 0 auto;min-height:61px;border-bottom:1px solid #28435d;}
+.guide-toolbar-copy {padding:10px 14px;min-width:0;}
+.guide-toolbar-copy h2 {margin:0;font-size:18px;}
+.guide-toolbar-copy p {margin:4px 0 0;font-size:11px;color:#8db7d1;}
+.guide-clock {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;color:#b9d4e9;font-weight:700;}
+.guide-clock span {display:block;border-left:1px solid #2a4058;padding-left:10px;font-size:13px;}
+.guide-scroll {overflow:auto;flex:1 1 auto;min-height:0;overscroll-behavior:contain;scroll-padding:10px;}
+.guide-row {display:grid;grid-template-columns:240px minmax(0,1fr);min-height:64px;border-bottom:1px solid #24364b;}
+.guide-row.selected {background:#0d2b43;}
+.guide-channel {display:flex;align-items:center;gap:11px;min-width:0;padding:8px 12px;text-align:left;color:#f1f8fd;background:#102036;border:0;border-right:1px solid #2b4057;font-size:13px;font-weight:700;}
+.guide-channel img {width:35px;height:33px;object-fit:contain;flex-shrink:0;}
+.guide-channel span {overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.guide-channel:hover,.guide-channel:focus {background:#175179;outline:3px solid #6bddff;outline-offset:-3px;}
+.guide-timeline {position:relative;min-height:64px;min-width:0;background:repeating-linear-gradient(to right,#14253a 0,#14253a calc(25% - 1px),#2a4058 calc(25% - 1px),#2a4058 25%);}
+.guide-program {position:absolute;top:4px;bottom:4px;min-width:0;padding:5px 9px;display:flex;flex-direction:column;justify-content:center;gap:3px;background:#1b354e;border:1px solid #304c67;border-radius:5px;color:#e9f4fc;text-align:left;overflow:hidden;}
+.guide-program strong {font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.guide-program small {font-size:10px;color:#adc3d9;white-space:nowrap;}
+.guide-program.is-on-now {background:#14668c;border-color:#2fb1e4;}
+.guide-program:focus {background:#0a89b6;outline:3px solid #9defff;outline-offset:-3px;z-index:2;}
+.guide-no-data {background:#172437;border-style:dashed;color:#7f9db7;}
+.guide-empty {position:absolute;left:8px;top:23px;color:#7392ad;font-size:12px;}
+.guide-more {margin:12px 10px;padding:12px 20px;color:#eafaff;background:#12374f;border:1px solid #38657a;border-radius:10px;text-align:center;}
+/* v5: EPG ocupa o espaço de rolagem antes usado pela grade de cards. */
+#appScreen.live-layout .live-guide { flex:1 1 auto;min-height:0; }
+#appScreen.live-layout .catalog-heading {margin:10px 0 7px;}
+#appScreen.live-layout .hero { height:clamp(235px,34vh,360px); }
+#appScreen.live-layout .page-top {margin-bottom:13px;}
+#appScreen.live-layout .filterbar {margin-bottom:10px;}
+#appScreen:not(.live-layout) .live-guide {display:none;}
+.next-episode-btn {margin:12px 0 16px;}
+@media (max-height:830px) {
+  #appScreen.live-layout .hero {height:clamp(205px,29vh,275px);}
+  #appScreen.live-layout .main-content {padding-top:13px;padding-bottom:12px;}
+  .guide-row {min-height:55px;}.guide-timeline {min-height:55px;}
+  .guide-toolbar{min-height:54px;}
+}
+@media (max-width:1120px) {
+  .guide-toolbar,.guide-row {grid-template-columns:180px minmax(0,1fr);}
+  .guide-channel{font-size:11px;}
+  .guide-program strong{font-size:10px;}
+  .home-tiles{gap:11px;}.home-tile{padding:16px;min-height:160px;}.home-tile strong{font-size:21px;}
+  .home-tile .tile-icon{top:12px;left:16px;font-size:26px;}
+  .home-poster{flex-basis:124px;}.home-cover{height:142px;}
+}
+/* Destaque cinematográfico sem mexer no player AVPlay. */
+#appScreen.vod-layout .hero {min-height:360px;background:linear-gradient(110deg,#10263b,#061522);}
+#appScreen.vod-layout .hero-copy {position:relative;z-index:2;}
+#appScreen.vod-layout .hero-copy h2 {font-size:clamp(32px,3.5vw,56px);}
+#appScreen.vod-layout .preview-frame {border-color:#294358;}
+#appScreen.vod-layout .preview-placeholder {background-position:center 20%;background-size:cover;}
+#appScreen.vod-layout .preview-placeholder .preview-mark,
+#appScreen.vod-layout .preview-placeholder strong:empty,
+#appScreen.vod-layout .preview-placeholder small:empty {display:none;}
+#appScreen.vod-layout .preview-bottom {display:none;}
+.guide-timeline:after {content:"";position:absolute;top:0;bottom:0;left:var(--guide-now-pct,25%);border-left:2px solid #20b4e7;z-index:3;pointer-events:none;}
+#appScreen.live-layout .hero {height:clamp(215px,27vh,290px);}
+@media(max-height:650px) {
+  #appScreen.live-layout .hero {height:clamp(155px,25vh,210px);}
+  #appScreen.live-layout .hero-copy h2{font-size:19px;}
+  #appScreen.live-layout .hero-description{font-size:11px;}
+  #appScreen.live-layout .catalog-heading{margin:6px 0 5px;}
+  #appScreen.live-layout .page-top{margin-bottom:6px;}
+}
+
+/* ==============================================================
+   MDStream 5.1 — Navegação pela Home; sem menu lateral duplicado.
+   A prévia AVPlay mantém 16:9. A guia EPG rola separadamente.
+   ============================================================= */
+.app-screen { display:block; width:100%; min-width:0; }
+.app-screen .main-content {
+  width:100%; max-width:none; min-height:100vh; padding:28px clamp(24px,4vw,78px) 54px;
+  background:radial-gradient(ellipse at 55% -8%,#173451 0%,#0d1c30 42%,#080f1d 85%);
+}
+.home-dashboard {max-width:1880px;margin:0 auto;}
+.home-toolbar {display:flex;align-items:center;justify-content:space-between;gap:22px;padding:5px 0 22px;border-bottom:1px solid #243b55;margin-bottom:31px;}
+.home-toolbar .brand {font-size:clamp(25px,2.2vw,39px);}
+.home-toolbar .brand-symbol {width:42px;height:42px;}
+.home-toolbar-actions {display:flex;gap:24px;align-items:center;}
+.connected-tag {color:#9fd3e5;font-size:14px;white-space:nowrap;}
+.home-account-button {padding:13px 21px;color:#d2eaff;background:#172e45;border:1px solid #3a5b76;border-radius:12px;font-weight:700;}
+.home-account-button:hover,.home-account-button:focus {background:#246084;}
+.home-heading {margin-bottom:30px;}
+.home-heading h1 {font-size:clamp(32px,3.5vw,57px);}
+.home-tiles {grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin:0 auto 36px;}
+.home-tile {min-height:clamp(240px,28vh,355px);padding:34px;border-radius:24px;}
+.home-tile .tile-icon {font-size:58px;left:32px;top:30px;}
+.home-tile strong {font-size:clamp(27px,2.7vw,45px);}
+.home-tile small {font-size:17px;}
+.home-strip {margin:32px 0;}
+.home-poster {flex-basis:clamp(148px,11vw,210px);}
+.home-cover {height:clamp(170px,14vw,252px);}
+/* Topo contextual das telas secundárias */
+.app-screen .page-top {max-width:1880px; margin:0 auto 18px;gap:20px;}
+.section-heading {display:flex;align-items:center;gap:26px;min-width:0;}
+.section-back {display:flex;align-items:center;gap:10px;white-space:nowrap;color:#d8f2ff;background:#16324c;border:1px solid #3b6583;border-radius:12px;padding:13px 21px;font-size:16px;font-weight:800;}
+.section-back:hover,.section-back:focus {background:#245f85;}
+.section-heading .bread .eyebrow {font-size:10px;}
+.section-heading .bread h1 {font-size:clamp(24px,2vw,34px);margin:6px 0 0;}
+/* Hero Ao Vivo: prévia à esquerda, informação do canal à direita. */
+#appScreen.live-layout .main-content {height:100vh;padding:16px clamp(20px,2.6vw,54px) 14px;}
+#appScreen.live-layout .page-top {margin-bottom:13px;}
+#appScreen.live-layout .hero {
+  display:grid; grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);
+  align-items:center; gap:clamp(16px,2.5vw,46px);
+  padding:16px 24px; border-radius:20px;
+  min-height:0;height:clamp(310px,43vh,480px);
+  background:linear-gradient(115deg,#091b2b,#122840 65%,#132b41);
+}
+#appScreen.live-layout .preview-frame {
+  grid-column:1;grid-row:1; justify-self:center; align-self:center;
+  width:100%; max-width: min(100%, calc(76.5vh - 74px));
+  height:auto; max-height:100%; aspect-ratio:16/9;
+  border-radius:14px; border:1px solid #376b8d;
+  box-shadow:0 14px 35px #0007;
+}
+#appScreen.live-layout .hero-copy {grid-column:2;grid-row:1;justify-content:center;min-width:0;}
+#appScreen.live-layout .hero-copy h2 {font-size:clamp(23px,2.3vw,43px);margin:10px 0;line-height:1.13;}
+#appScreen.live-layout .hero-description {font-size:clamp(12px,1vw,17px);line-height:1.4;min-height:0;max-height:5.6em;overflow:hidden;}
+#appScreen.live-layout .hero-meta {margin:10px 0 15px;}
+#appScreen.live-layout .hero-buttons button {padding:13px 20px;font-size:15px;}
+#appScreen.live-layout .catalog-heading {margin:12px 0 9px;}
+#appScreen.live-layout .filterbar {margin-bottom:9px;}
+#appScreen.live-layout .live-guide {border-radius:14px;}
+#appScreen.live-layout .guide-toolbar {min-height:53px;}
+#appScreen.live-layout .guide-row {min-height:61px;}
+/* Viewport reduzido, como o navegador de algumas Samsung */
+@media(max-height:830px){
+  #appScreen.live-layout .main-content {padding-top:10px;padding-bottom:9px;}
+  #appScreen.live-layout .page-top {margin-bottom:7px;}
+  #appScreen.live-layout .hero {height:clamp(235px,42vh,346px);padding:12px 18px;gap:18px;}
+  #appScreen.live-layout .preview-frame {max-width:min(100%,calc(74.7vh - 57px));}
+  #appScreen.live-layout .hero-copy h2 {font-size:clamp(21px,2.25vw,32px);margin:6px 0;}
+  #appScreen.live-layout .hero-meta {margin:6px 0 9px;}
+  #appScreen.live-layout .hero-buttons button {padding:10px 14px;font-size:13px;}
+  #appScreen.live-layout .catalog-heading {margin:9px 0 6px;}
+  #appScreen.live-layout .catalog-heading h2 {font-size:18px;}
+  #appScreen.live-layout .filterbar {margin-bottom:6px;}
+  #appScreen.live-layout .category-btn {padding:8px 10px;}
+  #appScreen.live-layout .guide-toolbar {min-height:45px;}
+  #appScreen.live-layout .guide-row {min-height:52px;}
+}
+@media(max-height:600px){
+  #appScreen.live-layout .hero {height:clamp(220px,42vh,260px);padding:9px 14px;gap:14px;}
+  #appScreen.live-layout .preview-frame {max-width:min(100%,calc(74.7vh - 76px));}
+  #appScreen.live-layout .hero-description {font-size:11px;max-height:2.85em;}
+  #appScreen.live-layout .hero-copy h2 {font-size:20px;}
+  #appScreen.live-layout .hero-meta {margin:4px 0 7px;}
+  #appScreen.live-layout .section-back {padding:9px 11px;}
+  #appScreen.live-layout .page-top h1 {font-size:23px;}
+  #appScreen.live-layout .filterbar {margin-bottom:5px;}
+  #appScreen.live-layout .guide-toolbar {min-height:41px;}
+}
+@media(max-width:1100px){
+  .app-screen .main-content {padding:22px 28px 40px;}
+  .home-tiles {gap:13px;}
+  .home-tile {min-height:190px;padding:21px;}
+  .home-tile .tile-icon {font-size:32px;top:18px;left:22px;}
+  .home-tile strong {font-size:26px;}
+  .home-tile small {font-size:13px;}
+  #appScreen.live-layout .main-content {padding:10px 20px 10px;}
+  #appScreen.live-layout .hero {grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);}
+  .section-heading {gap:12px;}
+  .section-back {padding:10px 13px;font-size:13px;}
+}
+@media(max-width:700px){
+  .home-toolbar {flex-wrap:wrap;}
+  .home-tiles {grid-template-columns:1fr;}
+  .home-tile {min-height:180px;}
+  .app-screen .page-top {flex-wrap:wrap;}
+  #appScreen.live-layout {height:auto;min-height:100vh;overflow:visible;}
+  #appScreen.live-layout .main-content {height:auto;overflow:visible;}
+  #appScreen.live-layout .hero {height:auto;grid-template-columns:1fr;}
+  #appScreen.live-layout .preview-frame {grid-row:1;grid-column:1;max-width:100%;min-height:200px;}
+  #appScreen.live-layout .hero-copy {grid-row:2;grid-column:1;}
+  #appScreen.live-layout .live-guide {height:370px;min-height:370px;}
+}
+/* Exibição compacta em viewport 960×540: priorizar espaço para a grade EPG.
+   O próprio guia já exibe o título, então não repetimos "Escolha um canal". */
+@media (min-width:701px) and (max-height:650px) {
+  #appScreen.live-layout .catalog-heading { display:none; }
+  #appScreen.live-layout .hero {height:clamp(188px,37vh,220px);}
+  #appScreen.live-layout .preview-frame {max-width:min(100%,calc(66vh - 55px));}
+  #appScreen.live-layout .filterbar {display:flex;flex-wrap:nowrap;margin:7px 0 5px;gap:9px;}
+  #appScreen.live-layout .categories {flex:1 1 auto;min-width:0;max-width:none;padding:3px 2px 6px;}
+  #appScreen.live-layout .search-box {flex:0 0 180px;width:180px;min-width:160px;}
+  #appScreen.live-layout .search-box input {padding-top:9px;padding-bottom:9px;}
+  #appScreen.live-layout .hero-copy h2 {margin:3px 0;line-height:1.06;}
+  #appScreen.live-layout .hero-meta {margin:5px 0;}
+  #appScreen.live-layout .hero-buttons button {padding:8px 11px;}
+}
+/* Ajustes finos de cabeçalho em layouts TV, inclusive 960×540. */
+#appScreen.live-layout .page-top {width:100%;max-width:none;margin-left:0;margin-right:0;}
+@media (max-width:1100px){
+  #appScreen.live-layout .guide-toolbar-copy h2 {font-size:14px;white-space:nowrap;}
+  #appScreen.live-layout .guide-toolbar-copy p {display:none;}
+  #appScreen.live-layout .guide-toolbar-copy {display:flex;align-items:center;}
+  #appScreen.live-layout .guide-clock span {font-size:12px;padding-left:7px;}
+}
+
+
+/* MDStream 5.2 — VOD compacto, busca primeiro, ações rápidas.
+   A área Ao Vivo não sofre alteração. */
+#appScreen.vod-layout .hero { display:none !important; }
+#appScreen.vod-layout .main-content {padding-top:clamp(16px,2vw,32px);}
+#appScreen.vod-layout .page-top {margin-bottom:20px;}
+.vod-search-header {max-width:1880px;margin:0 auto 18px;padding:24px 28px 25px;border:1px solid #28455d;border-radius:18px;background:linear-gradient(120deg,#0f2b41,#101b30 75%);}
+.vod-search-heading {display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:15px;}
+.vod-search-heading h2 {font-size:clamp(21px,2.1vw,34px);margin:6px 0 0;}
+.vod-search-heading p:last-child {color:#97b8cc;font-size:14px;margin:0 0 4px;max-width:430px;text-align:right;line-height:1.4;}
+.vod-search-header .search-box {display:block;width:min(780px,100%);max-width:100%;}
+.vod-search-header .search-box input {height:58px;font-size:20px;border:2px solid #456b86;background:#091726;box-shadow:0 3px 15px #0002;}
+.vod-search-header .search-box:focus-within input {outline:3px solid #73dbff;outline-offset:2px;border-color:#43cafa;}
+.vod-search-header .search-box span {top:14px;font-size:26px;}
+#appScreen.vod-layout .catalog-heading {margin:12px auto 14px;max-width:1880px;}
+#appScreen.vod-layout .history-tabs {margin:0 auto 13px;max-width:1880px;}
+#appScreen.vod-layout .filterbar {max-width:1880px;margin:0 auto 17px;gap:0;}
+#appScreen.vod-layout .categories {width:100%;max-width:100%;}
+#appScreen.vod-layout .media-grid {grid-template-columns:repeat(8,minmax(0,1fr));gap:12px;max-width:1880px;margin:0 auto;}
+#appScreen.vod-layout .media-card {border-radius:12px;}
+#appScreen.vod-layout .poster {aspect-ratio:2/3;}
+#appScreen.vod-layout .card-copy {padding:10px 10px 11px;min-height:59px;}
+#appScreen.vod-layout .card-copy strong {font-size:13px;}
+#appScreen.vod-layout .card-copy small {font-size:11px;margin-top:5px;}
+#appScreen.vod-layout .watched-badge {font-size:10px;}
+.home-poster {flex-basis:clamp(135px,9vw,170px);}
+.home-cover {height:clamp(150px,12vw,208px);}
+/* Diálogo compacto, acionável pelo Smart Remote */
+.quick-overlay {position:fixed;inset:0;z-index:19;background:rgba(2,7,17,.88);display:flex;align-items:center;justify-content:center;padding:24px;}
+.quick-panel {position:relative;display:flex;align-items:center;gap:28px;width:min(840px,96vw);padding:30px;background:linear-gradient(145deg,#172e45,#0d1b30);border:1px solid #3b6483;border-radius:23px;box-shadow:0 30px 85px #000b;}
+.quick-close {position:absolute;top:15px;right:16px;border:1px solid #385571;border-radius:11px;background:#162b40;color:#e8faff;font-size:16px;padding:9px 14px;}
+.quick-cover {flex:0 0 clamp(130px,16vw,200px);aspect-ratio:2/3;border-radius:12px;background:linear-gradient(145deg,#1a4f70,#0b172b);display:grid;place-items:center;color:#a6e6ff;font-size:40px;overflow:hidden;}
+.quick-cover img {width:100%;height:100%;object-fit:cover;}
+.quick-info {flex:1;min-width:0;padding:18px 20px 8px 0;}
+.quick-info h2 {font-size:clamp(22px,2.5vw,36px);margin:10px 0;line-height:1.17;}
+.quick-info #quickSynopsis {color:#b3cbdb;font-size:15px;line-height:1.5;max-height:6em;overflow:hidden;}
+.quick-actions {display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;}
+.quick-actions button {min-width:146px;padding:15px 21px;}
+.quick-panel button:focus {outline:4px solid #84e7ff;outline-offset:3px;}
+@media(max-width:1550px){#appScreen.vod-layout .media-grid {grid-template-columns:repeat(7,minmax(0,1fr));}}
+@media(max-width:1200px){#appScreen.vod-layout .media-grid {grid-template-columns:repeat(6,minmax(0,1fr));}}
+@media(max-width:1050px){#appScreen.vod-layout .media-grid {grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;} .vod-search-header {padding:15px 18px;} .vod-search-header .search-box input {height:48px;font-size:17px;}}
+@media(max-width:720px){#appScreen.vod-layout .media-grid {grid-template-columns:repeat(3,minmax(0,1fr));} .vod-search-heading p:last-child {display:none;} .quick-panel {gap:16px;padding:20px;} .quick-cover {flex-basis:110px;} .quick-info {padding-right:0;} .quick-actions button {min-width:0;padding:11px 12px;}}
+@media(max-width:450px){#appScreen.vod-layout .media-grid {grid-template-columns:repeat(2,minmax(0,1fr));} .quick-cover {display:none;}}
+
+/* Evita repetir o título da seção e ganha uma fileira de capas na TV. */
+#appScreen.vod-layout .catalog-heading {display:none !important;}
+@media (min-width:701px) and (max-height:650px) {
+  #appScreen.vod-layout .main-content {padding:8px 18px 16px;}
+  #appScreen.vod-layout .page-top {margin-bottom:8px;}
+  #appScreen.vod-layout .section-back {padding:9px 12px;}
+  #appScreen.vod-layout .section-heading .bread h1 {margin-top:2px;font-size:23px;}
+  #appScreen.vod-layout .vod-search-header {padding:11px 15px 12px;margin-bottom:8px;}
+  #appScreen.vod-layout .vod-search-heading {margin-bottom:8px;}
+  #appScreen.vod-layout .vod-search-heading h2 {font-size:20px;margin:3px 0 0;}
+  #appScreen.vod-layout .vod-search-heading .eyebrow {font-size:9px;}
+  #appScreen.vod-layout .vod-search-heading p:last-child {font-size:11px;}
+  #appScreen.vod-layout .vod-search-header .search-box input {height:40px;padding-top:8px;padding-bottom:8px;font-size:16px;}
+  #appScreen.vod-layout .vod-search-header .search-box span {top:7px;}
+  #appScreen.vod-layout .history-tabs {margin-bottom:6px;gap:8px;}
+  #appScreen.vod-layout .history-tab {padding:7px 12px;font-size:12px;}
+  #appScreen.vod-layout .filterbar {margin-bottom:7px;}
+  #appScreen.vod-layout .category-btn {padding:6px 9px;font-size:11px;}
+  #appScreen.vod-layout .categories {padding-bottom:4px;}
+  #appScreen.vod-layout .media-grid {grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;}
+  #appScreen.vod-layout .card-copy {padding:7px 8px 8px;min-height:45px;}
+  #appScreen.vod-layout .card-copy strong {font-size:12px;}
+  #appScreen.vod-layout .card-copy small {font-size:10px;margin-top:2px;}
+}
+
+/* MDStream 5.2.1 — Home objetiva: somente TV, Filmes e Séries. */
+.home-dashboard { display:flex;flex-direction:column;min-height:calc(100vh - 120px); }
+.home-tiles { width:100%; margin:clamp(24px,8vh,85px) auto auto; }
+@media (max-height:650px) {
+  .home-dashboard { min-height:0; }
+  .home-tiles { margin:18px auto 0; }
+}

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MDStream | TV, filmes e séries</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="$WEBAPIS/webapis/webapis.js"></script>
+</head>
+<body>
+  <section id="profilesScreen" class="profiles-screen" hidden>
+    <div class="profiles-shell">
+      <div class="brand"><span class="brand-symbol">▶</span> MD<span>Stream</span></div>
+      <p class="eyebrow">SEUS ACESSOS</p>
+      <h1>Como vamos assistir hoje?</h1>
+      <p class="subtle">Selecione um perfil salvo nesta TV ou adicione outro serviço.</p>
+      <div id="savedProfiles" class="profiles-grid" aria-label="Perfis salvos"></div>
+      <button id="addProfileBtn" type="button" class="add-profile">＋ Adicionar novo acesso</button>
+      <p id="profilesStatus" class="status" role="status" aria-live="polite"></p>
+      <p class="fineprint">Perfis armazenados somente neste aplicativo e dispositivo. As senhas lembradas não são criptografadas.</p>
+    </div>
+  </section>
+
+  <section id="deleteOverlay" class="delete-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+    <div class="delete-box">
+      <h2 id="deleteTitle">Excluir este acesso?</h2>
+      <p id="deleteDescription" class="subtle"></p>
+      <div class="delete-actions">
+        <button id="cancelDelete" type="button" class="button-ghost">Cancelar</button>
+        <button id="confirmDelete" type="button" class="danger-button">Excluir acesso</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="loginScreen" class="login-screen">
+    <div class="login-art" aria-hidden="true"><span class="art-ring"></span><span class="art-play">▶</span></div>
+    <div class="login-panel">
+      <div class="brand"><span class="brand-symbol">▶</span> MD<span>Stream</span></div>
+      <button id="loginBackBtn" type="button" class="login-back" hidden>← Escolher outro acesso</button>
+      <p class="eyebrow">A SUA EXPERIÊNCIA DE ENTRETENIMENTO</p>
+      <h1 id="loginHeading">Entre e descubra.</h1>
+      <p class="subtle">TV ao vivo, filmes e séries num só lugar.</p>
+      <div class="mode-switch" role="group" aria-label="Forma de conexão">
+        <button class="mode selected" id="modeXtream" type="button">Xtream Codes</button>
+        <button class="mode" id="modeM3u" type="button">Link M3U</button>
+      </div>
+      <form id="loginForm">
+        <label for="profileName">Nome do acesso</label>
+        <input type="text" id="profileName" maxlength="60" placeholder="Ex.: TV da sala" autocomplete="off">
+
+        <div id="xtreamFields">
+          <label for="server">Servidor</label>
+          <input type="url" id="server" placeholder="https://servidor.exemplo:porta" autocomplete="url">
+          <label for="username">Usuário</label>
+          <input type="text" id="username" placeholder="Seu usuário" autocomplete="off">
+          <label for="password">Senha</label>
+          <input type="password" id="password" placeholder="Sua senha" autocomplete="off">
+        </div>
+        <div id="m3uFields" hidden>
+          <label for="playlistUrl">Link completo M3U</label>
+          <textarea id="playlistUrl" rows="4" placeholder="https://servidor/get.php?username=...&amp;password=..."></textarea>
+          <p class="fineprint">Para filmes e séries, o provedor precisa oferecer também a API Xtream.</p>
+        </div>
+        <div class="remember-panel">
+          <label class="checkbox-line"><input id="saveProfile" type="checkbox" checked><span>Salvar este perfil na TV</span></label>
+          <label class="checkbox-line"><input id="rememberPassword" type="checkbox"><span>Lembrar também a senha <small>(não criptografada)</small></span></label>
+          <label class="checkbox-line"><input id="autoConnect" type="checkbox" disabled><span>Entrar automaticamente ao abrir o MDStream</span></label>
+          <p class="fineprint">Para entrar automaticamente, é necessário lembrar a senha. Em TV compartilhada, prefira deixar desmarcado.</p>
+        </div>
+        <button class="button-accent button-block" id="connectBtn" type="submit">Entrar no MDStream <span>→</span></button>
+        <p id="loginStatus" class="status" role="status" aria-live="polite"></p>
+      </form>
+      <p class="fineprint">Os perfis são locais: não aparecem automaticamente em outras TVs ou no Edge.</p>
+    </div>
+  </section>
+
+  <section id="appScreen" class="app-screen" hidden>
+    <main class="main-content">
+      <p id="storageWarning" class="storage-warning" hidden role="status"></p>
+      <section id="homeDashboard" class="home-dashboard" hidden aria-label="Início do MDStream">
+        <div class="home-toolbar">
+          <div class="brand"><span class="brand-symbol">▶</span> MD<span>Stream</span></div>
+          <div class="home-toolbar-actions">
+            <span class="connected-tag"><span class="green-dot"></span> Conectado</span>
+            <button id="logoutBtn" class="home-account-button" type="button">↪ Trocar acesso</button>
+          </div>
+        </div>
+        <div class="home-heading"><div><p class="eyebrow">BEM-VINDO DE VOLTA</p><h1>O que vamos assistir hoje?</h1><p>TV ao vivo, seus filmes e séries em um único lugar.</p></div><span class="home-clock" id="homeClock"></span></div>
+        <div class="home-tiles">
+          <button type="button" class="home-tile tile-live" data-open-section="live"><span class="tile-icon">▣</span><strong>TV ao vivo</strong><small>Guia de programação</small><span class="tile-arrow">↗</span></button>
+          <button type="button" class="home-tile tile-movies" data-open-section="movies"><span class="tile-icon">▷</span><strong>Filmes</strong><small>Seu próximo cinema</small><span class="tile-arrow">↗</span></button>
+          <button type="button" class="home-tile tile-series" data-open-section="series"><span class="tile-icon">▥</span><strong>Séries</strong><small>Continue suas histórias</small><span class="tile-arrow">↗</span></button>
+        </div>
+      </section>
+      <header class="page-top">
+        <div class="section-heading">
+          <button id="sectionBackBtn" class="section-back" type="button" aria-label="Voltar ao início">← Voltar</button>
+          <div class="bread"><span class="eyebrow">MDSTREAM / EXPLORAR</span><h1 id="sectionTitle">TV ao vivo</h1></div>
+        </div>
+        <div class="top-actions"><span id="catalogInfo" class="top-count"></span><span class="avatar">MD</span></div>
+      </header>
+
+      <section class="hero" aria-label="Conteúdo selecionado">
+        <div class="hero-copy">
+          <p class="eyebrow" id="heroEyebrow">ESCOLHA SEU CANAL</p>
+          <h2 id="heroTitle">Tudo o que você gosta, em um só lugar.</h2>
+          <p id="heroDescription" class="hero-description">Selecione um canal para prévia e use Tela cheia quando quiser ampliar.</p>
+          <div id="heroMeta" class="hero-meta"><span class="meta-chip">TV AO VIVO</span><span id="heroSecondary">Prévia 16:9</span></div>
+          <div class="hero-buttons">
+            <button id="heroWatch" type="button" class="button-accent" disabled>▶ <span id="heroWatchLabel">Assistir</span></button>
+            <button id="heroDetails" type="button" class="button-ghost" hidden>ⓘ Detalhes</button>
+            <button id="heroFormat" type="button" class="button-ghost" hidden>↻ Testar HLS</button>
+          </div>
+        </div>
+        <div class="preview-frame" id="previewFrame">
+          <div id="playerStage" class="player-stage">
+            <object id="avplayObject" type="application/avplayer" class="avplay-object"></object>
+            <video id="browserVideo" playsinline class="browser-video" hidden></video>
+          </div>
+          <div id="previewPlaceholder" class="preview-placeholder">
+            <div class="preview-mark">▶</div>
+            <strong id="previewLabel">Prévia ao vivo</strong>
+            <small id="previewHint">Selecione um canal na lista</small>
+          </div>
+          <span id="previewLive" class="preview-live" hidden><span class="red-dot"></span> AO VIVO</span>
+          <div class="preview-bottom"><span id="previewStatus" role="status">Pronto para reproduzir</span><span class="preview-decoration">◻</span></div>
+        </div>
+      </section>
+
+      <div class="catalog-heading"><div><p class="eyebrow">CATÁLOGO</p><h2 id="listTitle">Escolha um canal</h2></div><span id="resultCount" class="subtle"></span></div>
+      <section id="vodSearchHeader" class="vod-search-header" hidden aria-label="Pesquisar filmes e séries">
+        <div class="vod-search-heading"><div><p class="eyebrow">ENCONTRE SEU PRÓXIMO TÍTULO</p><h2>O que você quer assistir?</h2></div><p>Pesquise primeiro pelo nome. Depois, se quiser, refine por categoria.</p></div>
+      </section>
+      <div class="history-tabs" id="historyTabs" hidden role="group" aria-label="Histórico do catálogo">
+        <button type="button" class="history-tab active" data-history="all">Todos</button>
+        <button type="button" class="history-tab" data-history="continue">▶ Continuar assistindo</button>
+        <button type="button" class="history-tab" data-history="recent">◷ Vistos recentemente</button>
+      </div>
+      <div class="filterbar"><div id="categories" class="categories" aria-label="Categorias"></div><label class="search-box" id="catalogSearchBox"><span>⌕</span><input type="search" id="searchInput" placeholder="Buscar canais..." aria-label="Pesquisar conteúdo"></label></div>
+      <div id="catalogMessage" class="catalog-message" hidden role="status"></div>
+      <section id="liveGuide" class="live-guide" hidden aria-label="Grade de programação dos canais"></section>
+      <div id="mediaGrid" class="media-grid" aria-label="Conteúdos"></div>
+      <button id="loadMoreBtn" class="load-more" type="button" hidden>Mostrar mais resultados ↓</button>
+    </main>
+  </section>
+
+  <section id="quickOverlay" class="quick-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="quickTitle">
+    <div class="quick-panel">
+      <button id="quickClose" class="quick-close" type="button" aria-label="Fechar opções">✕</button>
+      <div id="quickCover" class="quick-cover"><span>▶</span></div>
+      <div class="quick-info">
+        <p id="quickKind" class="eyebrow">FILME</p>
+        <h2 id="quickTitle">Escolha como assistir</h2>
+        <p id="quickMeta" class="subtle"></p>
+        <p id="quickSynopsis">Você pode começar a assistir ou conferir todos os detalhes.</p>
+        <div class="quick-actions">
+          <button id="quickWatch" type="button" class="button-accent">▶ Assistir</button>
+          <button id="quickDetails" type="button" class="button-ghost">ⓘ Ver detalhes</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="detailOverlay" class="detail-overlay" hidden aria-label="Detalhes do conteúdo">
+    <div class="detail-panel">
+      <button type="button" id="detailClose" class="close-detail" aria-label="Fechar detalhes">✕ Fechar</button>
+      <div class="detail-heading"><div id="detailCover" class="detail-cover"><span>▶</span></div><div class="detail-copy"><p id="detailType" class="eyebrow">CONTEÚDO</p><h2 id="detailName"></h2><p id="detailMeta" class="subtle"></p><p id="detailPlot" class="detail-plot"></p><button id="detailWatch" type="button" class="button-accent" hidden>▶ Assistir filme</button> <button id="detailRestart" type="button" class="button-ghost" hidden>↻ Do início</button></div></div>
+      <div id="seasonArea" hidden><h3>Temporadas e episódios</h3><label for="seasonSelect">Temporada</label><select id="seasonSelect"></select><div id="episodes" class="episodes"></div></div>
+      <p id="detailStatus" class="subtle"></p>
+    </div>
+  </section>
+
+  <section id="fullscreenLayer" class="fullscreen-layer" hidden aria-label="Reprodução em tela cheia">
+    <div id="fullscreenDock" class="fullscreen-dock"></div>
+    <div class="fullscreen-top"><div><span class="eyebrow">MDSTREAM • REPRODUZINDO</span><h2 id="fullscreenTitle"></h2></div><button id="fullscreenBack" type="button" class="button-ghost">✕ Voltar</button></div>
+    <div class="fullscreen-bottom" hidden><p id="fullscreenStatus" role="status"></p><button id="fullPrev" type="button" class="button-ghost">◀ Anterior</button><button id="fullNext" type="button" class="button-ghost">Próximo ▶</button><span class="subtle">Voltar: retornar ao catálogo</span></div>
+    <div id="playbackToast" class="playback-toast" role="status" hidden></div>
+    <div id="vodControls" class="vod-controls" hidden aria-label="Controles de reprodução">
+      <div class="vod-title-row"><strong id="vodTitle"></strong><span>↑ Barra • ← → Escolher posição • OK Confirmar</span></div>
+      <div id="vodDiagnostics" class="vod-diagnostics" aria-live="off">AVPlay • Modo estável</div>
+      <div class="vod-progress-row">
+        <span id="vodCurrent">00:00</span>
+        <input id="vodProgress" type="range" min="0" max="1000" value="0" step="1" disabled aria-label="Barra de progresso. Setas para escolher posição e OK para confirmar">
+        <span id="vodDuration">--:--</span>
+      </div>
+      <div id="vodSeekTarget" class="vod-seek-target" aria-live="off" hidden></div>
+      <div class="vod-buttons">
+        <button type="button" id="vodBack" aria-label="Voltar 10 segundos">↶ 10s</button>
+        <button type="button" id="vodToggle" aria-label="Pausar ou continuar">❚❚ Pausar</button>
+        <button type="button" id="vodForward" aria-label="Avançar 10 segundos">10s ↷</button>
+        <button type="button" id="vodRecover" aria-label="Recuperar vídeo dessincronizado">↻ Recuperar vídeo</button>
+        <button type="button" id="vodStop" aria-label="Parar vídeo e voltar">■ Parar</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/xtream.js"></script>
+  <script src="js/profiles.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/epg-guide.js"></script>
+  <script src="main.js"></script>
+  <script src="js/tv-navigation.js"></script>
+  <script src="js/catalog-navigation.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets" id="http://yourdomain/MDStream" version="0.3.3" viewmodes="maximized">
+  <name>MDStream</name>
+  <icon src="icon.png" />
+  <content src="index.html" />
+  <access origin="*" subdomains="true" />
+  <feature name="http://tizen.org/feature/screen.size.normal.1080.1920" />
+  <tizen:setting screen-orientation="landscape" context-menu="disable" background-support="disable" encryption="disable" install-location="auto" hwkey-event="enable" />
+  <tizen:application id="if6V7jQJ8P.MDStream" package="if6V7jQJ8P" required_version="2.3" />
+  <tizen:privilege name="http://tizen.org/privilege/internet" />
+  <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice" />
+  <tizen:privilege name="http://tizen.org/privilege/application.launch" />
+  <tizen:metadata key="http://samsung.com/tv/metadata/prelaunch.support" value="true" />
+  <tizen:metadata key="http://tizen.org/metadata/app_ui_type/base_screen_resolution" value="extensive" />
+  <!-- Evita abrir o teclado quando o JavaScript move o foco; OK abre a IME. -->
+  <tizen:metadata key="http://samsung.com/tv/metadata/use.keypad.without.useraction" value="false" />
+  <tizen:profile name="tv-samsung" />
+</widget>
