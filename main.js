@@ -1,4 +1,4 @@
-// MDStream v5.2.1 - Home simplificada; Busca prioritária, catálogo compacto, ações rápidas VOD; mantém AVPlay e EPG.
+// MDStream v5.2.4 - transições seguras entre canais e encerramento do AVPlay; mantém próximo episódio, perfis e histórico.
 // Nunca registre URL de stream nem credenciais no console.
 document.addEventListener("DOMContentLoaded", function () {
   "use strict";
@@ -13,7 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
     editingId: null, originalMode: null, currentProfileId: null, loginAttempt: 0, deletingId: null,
     previewTimeout: null, controlsTimeout: null, toastTimeout: null,
     historyView:{movies:"all",series:"all"}, currentVod:null, pendingResume:null, lastHistorySave:0,
-    recoveringVod:false, scrubTargetMs:null, scrubSeeking:false, scrubLastKeyAt:0, scrubRepeatCount:0, guide:null, guideMeta:new Map(), seriesInfoCache:new Map()
+    recoveringVod:false, scrubTargetMs:null, scrubSeeking:false, scrubLastKeyAt:0, scrubRepeatCount:0, guide:null, guideMeta:new Map(), seriesInfoCache:new Map(),
+    seriesContext:null, episodeRequest:0, nextCountdown:null, vodCompletionHandled:false, lastVodProgress:{current:0,duration:0},
+    channelSwitchTimer:null
   };
   const player = new MDStreamPlayer($("playerStage"), $("browserVideo"), function (message, error) {
     $("previewStatus").textContent = message;
@@ -60,10 +62,12 @@ document.addEventListener("DOMContentLoaded", function () {
       state.lastHistorySave = now;
     }
   }
-  function flushHistory() { historyRecord(state.currentVod, true); }
+  function flushHistory() { if (!state.vodCompletionHandled) historyRecord(state.currentVod, true); }
   function handleVodCompleted() {
-    if (!state.currentVod || state.section === "live") return;
-    const progress = player.getProgress();
+    if (!state.currentVod || state.section === "live" || state.vodCompletionHandled) return;
+    state.vodCompletionHandled = true;
+    const liveProgress = player.getProgress();
+    const progress = liveProgress.duration ? liveProgress : state.lastVodProgress;
     const previous = state.currentVod.kind === "movies" ?
       watchHistory.getMovie(state.currentVod.id) : watchHistory.getEpisode(state.currentVod.episodeId);
     const duration = Number(progress.duration) || Number(previous && previous.durationMs) || 0;
@@ -72,10 +76,32 @@ document.addEventListener("DOMContentLoaded", function () {
       state.lastHistorySave = Date.now();
     }
     state.pendingResume = null;
-    if (state.isFullscreen) showToast("✓ Conteúdo concluído");
+    if (state.currentVod.kind === "series" && state.isFullscreen) {
+      offerNextEpisode();
+    } else if (state.isFullscreen) {
+      showToast("✓ Conteúdo concluído");
+    }
   }
-  window.addEventListener("pagehide", flushHistory);
-  document.addEventListener("visibilitychange", () => { if (document.hidden) flushHistory(); });
+  // Samsung multitarefa: sair para o Smart Hub não pode deixar o AVPlay
+  // transmitindo em segundo plano. Ao voltar, o usuário escolhe o canal.
+  function suspendPlayback() {
+    flushHistory();
+    clearTimeout(state.previewTimeout);
+    cancelPendingChannelSwitch();
+    cancelNextCountdown();
+    ++state.episodeRequest;
+    player.stop(); // fechamento imediato e cancelamento de prepareAsync
+    state.playing = null;
+    if (state.isFullscreen) {
+      closeFullscreen(); // restaura a interface sem retomar o fluxo automaticamente
+    } else if (state.section === "live") {
+      $("previewPlaceholder").hidden = false;
+      $("previewLive").hidden = true;
+      $("previewHint").textContent = "Selecione um canal para reabrir a prévia.";
+    }
+  }
+  window.addEventListener("pagehide", suspendPlayback);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) suspendPlayback(); });
   function currentHistoryRecord(item) {
     return item.kind === "movies" ? watchHistory.getMovie(item.id) : watchHistory.latestSeries(item.id);
   }
@@ -307,12 +333,17 @@ document.addEventListener("DOMContentLoaded", function () {
   async function showSection(section) {
     if (!state.client) return;
     const serial = ++state.loadSeq;
+    cancelPendingChannelSwitch();
     const previousSection = state.section;
     closeQuickActions(false);
     closeDetails();
-    if (state.isFullscreen) closeFullscreen();
+    if (state.isFullscreen) await closeFullscreen();
+    else { flushHistory(); await player.stop(); }
+    if (serial !== state.loadSeq) return;
     clearTimeout(state.previewTimeout);
-    player.stop();
+    cancelPendingChannelSwitch();
+    state.playing = null;
+    state.currentVod = null;
     state.section = section;
     if (section === "live") requestAnimationFrame(() => {
       if (state.section === section && !state.isFullscreen) $("sectionBackBtn").focus();
@@ -576,7 +607,11 @@ document.addEventListener("DOMContentLoaded", function () {
     updateSelectedHero(item, card);
     const currentProgram=state.guideMeta.get(String(item.id));
     if(currentProgram) $("heroDescription").textContent=currentProgram.title + (currentProgram.description ? " • "+currentProgram.description : "");
+    const alreadyPlaying = !state.isFullscreen && state.playing &&
+      String(state.playing.id) === String(item.id) &&
+      player.currentUrl && player.kind === "live";
     state.playing = item;
+    if (alreadyPlaying) return;
     $("previewPlaceholder").hidden = false;
     $("previewPlaceholder").style.backgroundImage = "";
     $("previewLabel").textContent = item.name;
@@ -588,6 +623,13 @@ document.addEventListener("DOMContentLoaded", function () {
     $("previewPlaceholder").hidden = !!result;
     if (!result) $("previewHint").textContent =
       "Prévia indisponível. Tente outro formato (TS / HLS).";
+  }
+
+  // Nenhum botão de ressincronização: trocas e saída gerenciam a sessão
+  // automaticamente, sem apresentar controles técnicos ao espectador.
+  function cancelPendingChannelSwitch() {
+    if (state.channelSwitchTimer) clearTimeout(state.channelSwitchTimer);
+    state.channelSwitchTimer = null;
   }
 
   async function selectItem(item, card) {
@@ -694,6 +736,103 @@ document.addEventListener("DOMContentLoaded", function () {
     openDetails(item);
   };
 
+  // Cache por acesso: evita baixar toda a lista novamente a cada episódio.
+  function getSeriesInfoCached(seriesId) {
+    const key = String(seriesId);
+    if (!state.seriesInfoCache.has(key)) {
+      const request = state.client.getSeriesInfo(key).catch(error => {
+        state.seriesInfoCache.delete(key);
+        throw error;
+      });
+      state.seriesInfoCache.set(key, request);
+    }
+    return state.seriesInfoCache.get(key);
+  }
+
+  async function orderedSeriesEpisodes(seriesId) {
+    const data = await getSeriesInfoCached(seriesId);
+    const seasons = data && data.episodes || {};
+    const seasonNumbers = Object.keys(seasons).sort((a,b) => Number(a) - Number(b) || a.localeCompare(b));
+    const ordered = [];
+    seasonNumbers.forEach(season => {
+      const entries = Array.isArray(seasons[season]) ? seasons[season] : [];
+      entries.slice().sort((a,b) => {
+        const one = Number(a && a.episode_num), two = Number(b && b.episode_num);
+        return (Number.isFinite(one) ? one : 0) - (Number.isFinite(two) ? two : 0);
+      }).forEach(item => { if (item && item.id != null) ordered.push(item); });
+    });
+    return ordered;
+  }
+
+  // A seleção do próximo episódio é independente da janela de detalhes.
+  async function prepareNextEpisode(series, episode) {
+    const requestId = ++state.episodeRequest;
+    const context = {series, episodeId:String(episode.id), next:null, loading:true};
+    state.seriesContext = context;
+    $("vodNextEpisode").hidden = true;
+    try {
+      const ordered = await orderedSeriesEpisodes(series.id);
+      if (requestId !== state.episodeRequest || state.seriesContext !== context) return;
+      const index = ordered.findIndex(entry => String(entry.id) === context.episodeId);
+      context.next = index >= 0 && index + 1 < ordered.length ? ordered[index+1] : null;
+    } catch (_) {
+      // Sem listagem confiável, não inventar o próximo ID do servidor.
+      context.next = null;
+    } finally {
+      if (requestId === state.episodeRequest && state.seriesContext === context) {
+        context.loading = false;
+        $("vodNextEpisode").hidden = !context.next;
+        if (state.vodCompletionHandled) offerNextEpisode();
+      }
+    }
+  }
+
+  function cancelNextCountdown() {
+    if (state.nextCountdown) clearInterval(state.nextCountdown);
+    state.nextCountdown = null;
+    $("nextEpisodeOverlay").hidden = true;
+  }
+
+  async function startNextEpisode() {
+    const ctx = state.seriesContext;
+    if (!ctx || !ctx.next || !state.isFullscreen || state.section !== "series") return;
+    const series = ctx.series, next = ctx.next;
+    cancelNextCountdown();
+    await playEpisode(series, next, false, true);
+  }
+
+  function offerNextEpisode() {
+    if (!state.isFullscreen || state.section !== "series" || !state.vodCompletionHandled) return;
+    const ctx = state.seriesContext;
+    if (!ctx || ctx.loading) return;
+    cancelNextCountdown();
+    if (!ctx.next) {
+      showToast("✓ Episódio concluído. Não há próximo episódio disponível.");
+      return;
+    }
+    $("nextEpisodeTitle").textContent = ctx.next.title || "Próximo episódio";
+    $("nextEpisodeOverlay").hidden = false;
+    let seconds = 12;
+    const updateLabel = () => {
+      $("nextEpisodePlay").textContent = "▶ Próximo episódio (" + seconds + "s)";
+    };
+    updateLabel();
+    $("nextEpisodePlay").focus();
+    state.nextCountdown = setInterval(() => {
+      if (!state.isFullscreen || $("nextEpisodeOverlay").hidden) { cancelNextCountdown(); return; }
+      seconds--;
+      updateLabel();
+      if (seconds <= 0) startNextEpisode();
+    }, 1000);
+  }
+  $("nextEpisodePlay").onclick = startNextEpisode;
+  $("nextEpisodeCancel").onclick = () => {
+    cancelNextCountdown();
+    showVodControls(true);
+    showToast("Reprodução automática cancelada.");
+  };
+  $("vodNextEpisode").onclick = startNextEpisode;
+
   async function openDetails(item) {
     if (state.section === "live") return;
     const kind = state.section;
@@ -737,7 +876,7 @@ document.addEventListener("DOMContentLoaded", function () {
         $("detailMeta").textContent = [detail.genre || item.group, detail.duration || "", detail.rating ? "Nota " + detail.rating : ""].filter(Boolean).join(" • ");
         $("detailWatch").onclick = () => playMovie(item);
       } else {
-        const response = await state.client.getSeriesInfo(item.id);
+        const response = await getSeriesInfoCached(item.id);
         if (state.currentDetail !== key) return;
         const detail = response.info || {};
         $("detailPlot").textContent = niceText(detail.plot || item.plot) || "Sinopse não disponível.";
@@ -816,6 +955,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return h ? h + ":" + String(m).padStart(2, "0") + ":" + s : String(m).padStart(2, "0") + ":" + s;
   }
   function updateVodProgress(progress) {
+    if (state.currentVod && progress && progress.duration > 0) state.lastVodProgress = {current:progress.current, duration:progress.duration};
     if (!$('vodProgress')) return;
     const duration = Number(progress.duration) || 0;
     const current = Number(progress.current) || 0;
@@ -994,12 +1134,23 @@ document.addEventListener("DOMContentLoaded", function () {
     const enter = key === 13 || event.key === "Enter";
     const live = state.section === "live";
     if (back || key === 413) {
-      event.preventDefault(); event.stopImmediatePropagation(); closeFullscreen(); return;
+      event.preventDefault(); event.stopImmediatePropagation(); cancelNextCountdown(); closeFullscreen(); return;
+    }
+    if (!$("nextEpisodeOverlay").hidden) {
+      if (enter) { event.preventDefault(); event.stopImmediatePropagation(); (document.activeElement === $("nextEpisodeCancel") ? $("nextEpisodeCancel") : $("nextEpisodePlay")).click(); return; }
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight" || key === 37 || key === 39) {
+        event.preventDefault(); event.stopImmediatePropagation();
+        (document.activeElement === $("nextEpisodePlay") ? $("nextEpisodeCancel") : $("nextEpisodePlay")).focus(); return;
+      }
+      event.preventDefault(); event.stopImmediatePropagation(); return;
     }
     if (live) {
       if (key === 427 || event.key === "PageUp") { event.preventDefault(); event.stopImmediatePropagation(); changeLive(1); }
       else if (key === 428 || event.key === "PageDown") { event.preventDefault(); event.stopImmediatePropagation(); changeLive(-1); }
-      else if (enter) { event.preventDefault(); event.stopImmediatePropagation(); showToast($("fullscreenTitle").textContent + " • Ao vivo"); }
+      else if (enter || event.key === "ArrowDown" || key === 40) {
+        // TV ao vivo permanece limpa: não há painel técnico sobre o vídeo.
+        event.preventDefault(); event.stopImmediatePropagation();
+      }
       return;
     }
     const mediaPlay = key === 10252 || key === 415 || key === 19;
@@ -1015,7 +1166,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (event.key === "ArrowLeft" || key === 37 || event.key === "ArrowRight" || key === 39) {
       event.preventDefault(); event.stopImmediatePropagation();
-      const buttons = [$("vodBack"), $("vodToggle"), $("vodForward"), $("vodRecover"), $("vodStop")];
+      const buttons = [$("vodBack"), $("vodToggle"), $("vodForward"), $("vodRecover"), $("vodNextEpisode"), $("vodStop")].filter(el => !el.hidden);
       const focusedIndex = $("vodControls").hidden ? -1 : buttons.indexOf(document.activeElement);
       const delta = (key === 37 || event.key === "ArrowLeft") ? -1 : 1;
       if (focusedIndex >= 0) {
@@ -1050,6 +1201,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }, true);
 
   function openFullscreen(title, live) {
+    cancelNextCountdown();
     clearScrub();
     clearTimeout(state.previewTimeout);
     closeDetails();
@@ -1069,7 +1221,12 @@ document.addEventListener("DOMContentLoaded", function () {
     requestAnimationFrame(() => player.position());
   }
   async function closeFullscreen() {
+    cancelPendingChannelSwitch();
     if (!state.isFullscreen) return;
+    cancelNextCountdown();
+    ++state.episodeRequest;
+    state.seriesContext = null;
+    $("vodNextEpisode").hidden = true;
     clearScrub();
     clearTimeout(state.controlsTimeout);
     clearTimeout(state.toastTimeout);
@@ -1097,6 +1254,12 @@ document.addEventListener("DOMContentLoaded", function () {
   $("fullscreenBack").onclick = closeFullscreen;
 
   async function playMovie(item, fromBeginning) {
+    cancelNextCountdown();
+    ++state.episodeRequest;
+    state.seriesContext = null;
+    $("vodNextEpisode").hidden = true;
+    state.vodCompletionHandled = false;
+    state.lastVodProgress = {current:0,duration:0};
     state.wasLiveBeforeFullscreen = false;
     const historyItem = {kind:"movies", id:String(item.id), title:item.name, image:item.image};
     state.currentVod = historyItem;
@@ -1108,7 +1271,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!ok) { state.currentVod = null; state.pendingResume = null; }
     updateVodProgress(player.getProgress());
   }
-  async function playEpisode(series, episode, fromBeginning) {
+  async function playEpisode(series, episode, fromBeginning, seamless) {
+    if (!series || !episode || episode.id == null) return;
+    // Quando o episódio muda sem sair da tela cheia, guardar o anterior.
+    if (seamless && !state.vodCompletionHandled) flushHistory();
+    cancelNextCountdown();
+    state.vodCompletionHandled = false;
+    state.lastVodProgress = {current:0,duration:0};
     state.wasLiveBeforeFullscreen = false;
     const ext = episode.container_extension || "mp4";
     const historyItem = {
@@ -1118,31 +1287,57 @@ document.addEventListener("DOMContentLoaded", function () {
     state.currentVod = historyItem;
     applyResume(historyItem);
     if (fromBeginning) state.pendingResume = null;
-    openFullscreen(series.name + " — " + (episode.title || "Episódio"), false);
+    const heading = series.name + " — " + (episode.title || "Episódio");
+    if (seamless && state.isFullscreen) {
+      clearScrub();
+      $("fullscreenTitle").textContent = heading;
+      $("vodTitle").textContent = heading;
+      showVodControls(false);
+    } else openFullscreen(heading, false);
+    prepareNextEpisode(series, episode);
     const url = state.client.getEpisodeUrl(episode.id, ext);
     const ok = await player.play(url, {kind:"vod"});
-    if (!ok) { state.currentVod = null; state.pendingResume = null; }
+    if (!ok && state.currentVod === historyItem) {
+      state.currentVod = null;
+      state.pendingResume = null;
+      cancelNextCountdown();
+      ++state.episodeRequest;
+      state.seriesContext = null;
+      $("vodNextEpisode").hidden = true;
+    }
     updateVodProgress(player.getProgress());
   }
   function changeLive(step) {
-    if (state.section !== "live" || !state.visible.length || !state.playing) return;
-    const index = state.visible.findIndex(item => item.id === state.playing.id);
+    if (!state.isFullscreen || state.section !== "live" || !state.visible.length || !state.playing) return;
+    const index = state.visible.findIndex(item => String(item.id) === String(state.playing.id));
+    if (index < 0) return;
     const item = state.visible[(index + step + state.visible.length) % state.visible.length];
     if (!item) return;
     state.playing = item;
     state.selected = Object.assign({kind:"live"}, item);
     $("fullscreenTitle").textContent = item.name;
-    player.play(liveUrl(item));
+    // Segurar CH +/- não abre várias conexões consecutivas: somente a última
+    // escolha é enviada ao AVPlay após um pequeno intervalo de estabilização.
+    cancelPendingChannelSwitch();
+    state.channelSwitchTimer = setTimeout(() => {
+      state.channelSwitchTimer = null;
+      if (document.hidden || !state.isFullscreen || state.section !== "live" ||
+          !state.playing || String(state.playing.id) !== String(item.id)) return;
+      player.play(liveUrl(item), {kind:"live"});
+    }, 220);
   }
   $("fullPrev").onclick = () => changeLive(-1);
   $("fullNext").onclick = () => changeLive(1);
-  $("logoutBtn").onclick = () => {
+  $("logoutBtn").onclick = async () => {
     ++state.loadSeq;
-    player.stop(); closeQuickActions(false); closeDetails();
-    if (state.isFullscreen) closeFullscreen();
+    cancelPendingChannelSwitch();
+    closeQuickActions(false); closeDetails();
+    if (state.isFullscreen) await closeFullscreen();
+    else { flushHistory(); await player.stop(); }
     state.client = null; state.catalogs = {}; state.selected = null; state.playing = null;
     state.currentProfileId = null;
     state.currentVod = null; state.pendingResume = null;
+    cancelNextCountdown(); ++state.episodeRequest; state.seriesContext = null;
     $("password").value = ""; $("playlistUrl").value = "";
     $("storageWarning").hidden = true;
     if (getProfiles().length) chooseProfiles();

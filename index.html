@@ -189,7 +189,17 @@
         <button type="button" id="vodToggle" aria-label="Pausar ou continuar">❚❚ Pausar</button>
         <button type="button" id="vodForward" aria-label="Avançar 10 segundos">10s ↷</button>
         <button type="button" id="vodRecover" aria-label="Recuperar vídeo dessincronizado">↻ Recuperar vídeo</button>
+        <button type="button" id="vodNextEpisode" hidden aria-label="Reproduzir próximo episódio">▶ Próximo episódio</button>
         <button type="button" id="vodStop" aria-label="Parar vídeo e voltar">■ Parar</button>
+      </div>
+    </div>
+    <div id="nextEpisodeOverlay" class="next-episode-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="nextEpisodeHeading">
+      <p class="eyebrow">EPISÓDIO CONCLUÍDO</p>
+      <h2 id="nextEpisodeHeading">Continuar assistindo?</h2>
+      <p id="nextEpisodeTitle"></p>
+      <div class="next-episode-actions">
+        <button id="nextEpisodePlay" type="button" class="button-accent">▶ Próximo episódio</button>
+        <button id="nextEpisodeCancel" type="button" class="button-ghost">Cancelar</button>
       </div>
     </div>
   </section>

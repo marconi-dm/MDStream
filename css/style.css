@@ -625,3 +625,13 @@ body.md-playback-mode .fullscreen-dock { background:transparent; }
   .home-dashboard { min-height:0; }
   .home-tiles { margin:18px auto 0; }
 }
+
+/* MDStream 5.2.2 — Episódio seguinte no AVPlay */
+#vodNextEpisode { background:#136d87; border-color:#45bcd9; }
+.next-episode-overlay { position:absolute; z-index:105; left:50%; bottom:14%; transform:translateX(-50%); width:min(670px,86vw); border:1px solid #3c6682; border-radius:22px; padding:28px 34px; background:linear-gradient(145deg,#0d2236f5,#071320f5); box-shadow:0 20px 65px #000b; text-align:center; color:#f2f9ff; }
+.next-episode-overlay h2 { font-size:28px; margin:7px 0 8px; }
+.next-episode-overlay p { font-size:20px; color:#b9d5e5; }
+.next-episode-actions { display:flex; justify-content:center; flex-wrap:wrap; gap:16px; margin-top:22px; }
+.next-episode-actions button {font-size:20px; padding:15px 22px; border-radius:12px; }
+.next-episode-actions button:focus {outline:4px solid #83ecff; outline-offset:3px;}
+

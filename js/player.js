@@ -41,6 +41,7 @@
       window.addEventListener('resize', followPreview);
       this.token = 0;
       this.queue = Promise.resolve();
+      this.pendingPrepareCancel = null;
       this.currentUrl = null;
       this.video.addEventListener("error", () => {
         if (this.currentUrl) this.onStatus("Este formato não é suportado no navegador. Teste na TV.", true);
@@ -55,6 +56,7 @@
       this.video.addEventListener("timeupdate", () => this.reportProgress());
       this.video.addEventListener("loadedmetadata", () => this.reportProgress());
       this.video.addEventListener("ended", () => {
+        if (!this.currentUrl) return;
         this.reportProgress();
         this.onComplete();
         this.onStatus("Vídeo finalizado", false);
@@ -133,8 +135,14 @@
     // kind='vod' só em filmes/séries; nunca ajustamos buffer de canais ao vivo.
     play(url, options = {}) {
       const token = ++this.token;
+      // A preparação anterior pode estar aguardando rede/servidor.
+      // Cancelamos a espera ANTES de enfileirar outro open(), para que apenas
+      // a seleção mais recente avance; callbacks antigos são ignorados via token.
+      if (this.pendingPrepareCancel) this.pendingPrepareCancel();
       this.onStatus("Carregando transmissão...", false);
       const job = async () => {
+        // Uma reprodução antiga não pode fechar a sessão mais recente.
+        if (token !== this.token) return false;
         this.stopEngine();
         if (token !== this.token) return false;
         this.currentUrl = url;
@@ -191,8 +199,26 @@
                 this.onStatus("Falha no AVPlay" + (code ? " (" + String(code).slice(0, 50) + ")" : "") + ". Verifique o arquivo/servidor.", true);
               }
             });
-            await new Promise((resolve, reject) => this.avplay.prepareAsync(resolve, reject));
-            if (token !== this.token) { this.stopEngine(); return false; }
+            // prepareAsync pode ficar pendente se o app mudar de tela enquanto prepara.
+            // Cancelamos a espera imediatamente no stop, sem continuar o play antigo.
+            const prepared = await new Promise((resolve) => {
+              let settled = false;
+              let timeout;
+              const finish = (ok) => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timeout);
+                if (this.pendingPrepareCancel === cancel) this.pendingPrepareCancel = null;
+                resolve(ok);
+              };
+              const cancel = () => finish(false);
+              this.pendingPrepareCancel = cancel;
+              timeout = setTimeout(() => finish(false), 20000);
+              try { this.avplay.prepareAsync(() => finish(true), () => finish(false)); }
+              catch (_) { finish(false); }
+            });
+            if (token !== this.token) return false;
+            if (!prepared) throw new Error("Falha ao preparar reprodução");
             this.position();
             // A API documenta seekTo em READY; recuperamos antes de dar play.
             if (this.kind === "vod" && Number(options.resumeAt) >= 5000) {
@@ -202,7 +228,7 @@
               } catch (_) {
                 this.lastResumeSucceeded = false;
               }
-              if (token !== this.token) { this.stopEngine(); return false; }
+              if (token !== this.token) return false;
             }
             this.avplay.play();
             this.startWatchdog();
@@ -217,7 +243,7 @@
           this.video.hidden = false;
           this.video.src = url;
           await this.video.play();
-          if (token !== this.token) { this.stopEngine(); return false; }
+          if (token !== this.token) return false;
           if (this.kind === "vod" && Number(options.resumeAt) > 0) {
             try { this.video.currentTime = Number(options.resumeAt) / 1000; } catch (_) {}
           }
@@ -225,7 +251,7 @@
           return true;
         } catch (_) {
           if (token === this.token) this.onStatus("Não foi possível reproduzir este conteúdo neste dispositivo.", true);
-          this.stopEngine();
+          if (token === this.token) this.stopEngine();
           return false;
         }
       };
@@ -370,15 +396,28 @@
         this.video.hidden = true;
       } catch (_) {}
       if (this.isSamsung) {
-        try { if (this.avplay.getState() !== "NONE") this.avplay.close(); } catch (_) {}
+        try {
+          const currentState = this.avplay.getState();
+          // Liberar imediatamente o decoder e a conexão de rede, sem manter
+          // uma sessão de Ao Vivo escondida na Home.
+          if (currentState === "PLAYING" || currentState === "PAUSED" || currentState === "READY") {
+            try { this.avplay.stop(); } catch (_) {}
+          }
+          if (this.avplay.getState() !== "NONE") this.avplay.close();
+        } catch (_) {
+          try { this.avplay.close(); } catch (_) {}
+        }
         if (this.avObject) this.avObject.style.display = 'none';
       }
     }
 
     stop() {
       ++this.token;
-      this.queue = this.queue.then(() => this.stopEngine(), () => this.stopEngine());
-      return this.queue;
+      // Não esperar uma fila de prepareAsync: fechamento deve ser imediato,
+      // inclusive ao sair para o Smart Hub ou ao voltar para a Home.
+      if (this.pendingPrepareCancel) this.pendingPrepareCancel();
+      this.stopEngine();
+      return Promise.resolve(true);
     }
   }
   window.MDStreamPlayer = MDStreamPlayer;
